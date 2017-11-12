@@ -251,8 +251,7 @@ class BaseDataProvider(with_metaclass(ABCMeta)):
                 # Queue the corresponding cache key so that we can
                 # ensure that *some* kind of value is cached, even if
                 # the backend doesn't return any data for it.
-                self._pending_cache_keys[load_key]\
-                    .add(self.gen_cache_key(value))
+                self._pending_cache_keys[load_key].add(cache_key)
 
     # noinspection PyUnusedLocal
     def _get_keys_to_load(self, hint):
