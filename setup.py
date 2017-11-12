@@ -36,7 +36,7 @@ setup(
 
     test_suite    = 'test',
     test_loader   = 'nose.loader:TestLoader',
-    tests_require = ['nose'],
+    tests_require = ['mock; python_version < "3.0"', 'nose'],
 
     license = 'MIT',
 

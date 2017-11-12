@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
 from abc import ABCMeta, abstractmethod as abstract_method
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from typing import Any, Hashable, Iterable, Mapping
 
 from six import iteritems, iterkeys, with_metaclass
@@ -39,10 +39,11 @@ class BaseDataProviderAggregator(with_metaclass(ABCMeta)):
         return self.aggregate_data(
             value = value,
 
-            data = {
-                key: self.data_providers[key][value]
+            # Using an OrderedDict, just in case order is significant.
+            data = OrderedDict(
+                (key, self.data_providers[key][value])
                     for key in self.gen_routing_keys(value)
-            },
+            ),
         )
 
     @property
@@ -109,11 +110,12 @@ class BaseDataProviderAggregator(with_metaclass(ABCMeta)):
         """
         Groups a set of values by their routing keys.
         """
-        groups = defaultdict(list)
+        # Using an OrderedDict, just in case order is significant.
+        groups = OrderedDict()
 
         for v in values:
             for key in self.gen_routing_keys(v):
-                groups[key].append(v)
+                groups.setdefault(key, []).append(v)
 
         return groups
 

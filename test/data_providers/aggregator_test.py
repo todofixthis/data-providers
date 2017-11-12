@@ -86,11 +86,11 @@ class DataProviderAggregatorTestCase(TestCase):
         """
         Typical usage of a data provider aggregator.
         """
-        jonathan    = {'firstName': 'Jonathan', 'lastName': 'Pryce'}
+        jonathan = {'firstName': 'Jonathan', 'lastName': 'Pryce'}
         # noinspection SpellCheckingInspection
-        harvey      = {'firsName': 'Harvey', 'lastName': 'Keitel'}
+        harvey = {'firsName': 'Harvey', 'lastName': 'Keitel'}
         # noinspection SpellCheckingInspection
-        robert      = {'firstName': 'Robert', 'lastName': 'De Niro'}
+        robert = {'firstName': 'Robert', 'lastName': 'De Niro'}
 
         aggregator = MovieLineAggregator()
         aggregator.register([jonathan, harvey, robert])
