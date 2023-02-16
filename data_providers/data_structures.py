@@ -42,11 +42,10 @@ class ParameterisedDefaultDict(default_dict):
             raise KeyError(key)
 
         # noinspection PyArgumentList
-        self[key] = value = \
-            self.default_factory(
-                key,
-                *self._factory_args,
-                **self._factory_kwargs
-            )
+        self[key] = value = self.default_factory(
+            key,
+            *self._factory_args,
+            **self._factory_kwargs
+        )
 
         return value

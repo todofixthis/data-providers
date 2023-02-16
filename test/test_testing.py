@@ -9,23 +9,21 @@ class MockDataProviderTestCase(TestCase):
         Typical usage of :py:class:`MockDataProvider`.
         """
         users = {
-            'alpha':    {},
-            'bravo':    {},
-            'charlie':  {},
-            'delta':    {},
+            'alpha': {},
+            'bravo': {},
+            'charlie': {},
+            'delta': {},
         }
 
-        data_provider =\
-            MockDataProvider({
-                # Note that the backend will not return any data for
-                # ``delta``.
-                'alpha':    {'firstName': 'Henry'},
-                'bravo':    {'firstName': 'Henry'},
-                'charlie':  {'firstName': 'Marcus'},
-            })
+        data_provider = MockDataProvider({
+            # Note that the backend will not return any data for ``delta``.
+            'alpha': {'firstName': 'Henry'},
+            'bravo': {'firstName': 'Henry'},
+            'charlie': {'firstName': 'Marcus'},
+        })
 
-        # You can't get any data until you've registered the
-        # corresponding values.
+        # You can't get any data until you've registered the corresponding
+        # values.
         with self.assertRaises(ValueError):
             # noinspection PyStatementEffect
             data_provider['alpha']

@@ -1,6 +1,5 @@
-from unittest import TestCase
-
 from itertools import chain
+from unittest import TestCase
 
 from data_providers.aggregator import BaseDataProviderAggregator
 from data_providers.testing import MockDataProvider
@@ -11,6 +10,7 @@ class MovieLineDataProvider(MockDataProvider):
     Data provider that will be used to test
     :py:class:`BaseDataProviderAggregator`.
     """
+
     def gen_load_key(self, value):
         return value['lastName']
 
@@ -20,21 +20,21 @@ class MovieLineDataProvider(MockDataProvider):
 
 class MovieLineAggregator(BaseDataProviderAggregator):
     """
-    Trivial data provider aggregator implementation that assembles
-    movie lines spoken by celebrities from a variety of sources.
+    Trivial data provider aggregator implementation that assembles movie lines
+    spoken by celebrities from a variety of sources.
 
     Used to test :py:class:`BaseDataProviderAggregator`.
     """
+
     def aggregate_data(self, value, data):
         return list(chain(*data.values()))
 
     def create_data_providers(self):
-        # Simulate a scenario where we are loading movie lines from
-        # different sources depending on which movie they come from.
-        # noinspection SpellCheckingInspection
+        # Simulate a scenario where we are loading movie lines from different
+        # sources depending on which movie they come from.
         return {
-            # Maybe we have all the lines from Brazil stored in a
-            # local database.
+            # Maybe we have all the lines from Brazil stored in a local
+            # database; I'm sure somebody does, anyway.
             'brazil':
                 MovieLineDataProvider({
                     'Pryce': [
@@ -48,8 +48,8 @@ class MovieLineAggregator(BaseDataProviderAggregator):
                     ],
                 }),
 
-            # Perhaps we hit a 3rd-party web service to download lines
-            # from Taxi Driver.
+            # Perhaps we hit a 3rd-party web service to download lines from
+            # Taxi Driver.
             'taxiDriver':
                 MovieLineDataProvider({
                     'De Niro': [
@@ -59,15 +59,13 @@ class MovieLineAggregator(BaseDataProviderAggregator):
                     'Keitel': [
                         "You're a funny guy - but looks aren't everything.",
                     ],
-                })
+                }),
         }
 
     def gen_routing_keys(self, value):
-        # noinspection SpellCheckingInspection
         if value['lastName'] in {'De Niro', 'Pryce'}:
             yield 'brazil'
 
-        # noinspection SpellCheckingInspection
         if value['lastName'] in {'De Niro', 'Keitel'}:
             yield 'taxiDriver'
 
@@ -78,9 +76,7 @@ class DataProviderAggregatorTestCase(TestCase):
         Typical usage of a data provider aggregator.
         """
         jonathan = {'firstName': 'Jonathan', 'lastName': 'Pryce'}
-        # noinspection SpellCheckingInspection
         harvey = {'firsName': 'Harvey', 'lastName': 'Keitel'}
-        # noinspection SpellCheckingInspection
         robert = {'firstName': 'Robert', 'lastName': 'De Niro'}
 
         aggregator = MovieLineAggregator()

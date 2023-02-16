@@ -5,13 +5,15 @@ from data_providers import BaseDataProvider, MutableDataProviderMixin
 
 class DataProviderTestCase(TestCase):
     """
-    Tests various aspects of data provider implementations (effectively
-    acts as a test case for :py:class:`BaseDataProvider`).
+    Tests various aspects of data provider implementations (effectively acts as
+    a test case for :py:class:`BaseDataProvider`).
     """
+
     def test_computed_keys(self):
         """
         The data provider uses different keys for loading and caching.
         """
+
         class TestDataProvider(BaseDataProvider):
             def gen_load_key(self, value):
                 # Use profession to load data from the backend.
@@ -22,11 +24,11 @@ class DataProviderTestCase(TestCase):
                 return value['lastName']
 
             def fetch_from_backend(self, load_keys):
-                # This roughly simulates a scenario where we have to
-                # hit a different backend depending on the load key.
-                # For example, the load key could be the name of the R
-                # function to invoke, the name of the database or
-                # collection to execute the query against, etc.
+                # This roughly simulates a scenario where we have to hit a
+                # different backend depending on the load key.
+                # For example, the load key could be the name of the R function
+                # to invoke, the name of the database or collection to execute
+                # the query against, etc.
                 for lk in load_keys:
                     method = getattr(self, 'get_{job}s'.format(job=lk), None)
                     if method:
@@ -46,8 +48,8 @@ class DataProviderTestCase(TestCase):
             @staticmethod
             def get_nazi_stooges():
                 return {
-                    'Belloq':   {'firstName': 'René'},
-                    'Donovan':  {'firstName': 'Walter'},
+                    'Belloq': {'firstName': 'René'},
+                    'Donovan': {'firstName': 'Walter'},
                 }
 
         users = [
@@ -70,9 +72,9 @@ class DataProviderTestCase(TestCase):
             users[0],
 
             {
-                'firstName':    'Henry',
-                'lastName':     'Jones',
-                'profession':   'historian',
+                'firstName': 'Henry',
+                'lastName': 'Jones',
+                'profession': 'historian',
             },
         )
 
@@ -80,9 +82,9 @@ class DataProviderTestCase(TestCase):
             users[1],
 
             {
-                'firstName':    'Marcus',
-                'lastName':     'Brody',
-                'profession':   'historian',
+                'firstName': 'Marcus',
+                'lastName': 'Brody',
+                'profession': 'historian',
             },
         )
 
@@ -90,9 +92,9 @@ class DataProviderTestCase(TestCase):
             users[2],
 
             {
-                'firstName':    'René',
-                'lastName':     'Belloq',
-                'profession':   'nazi_stooge',
+                'firstName': 'René',
+                'lastName': 'Belloq',
+                'profession': 'nazi_stooge',
             },
         )
 
@@ -100,9 +102,9 @@ class DataProviderTestCase(TestCase):
             users[3],
 
             {
-                'firstName':    'Walter',
-                'lastName':     'Donovan',
-                'profession':   'nazi_stooge',
+                'firstName': 'Walter',
+                'lastName': 'Donovan',
+                'profession': 'nazi_stooge',
             },
         )
 
@@ -110,11 +112,11 @@ class DataProviderTestCase(TestCase):
             users[4],
 
             {
-                # :py:meth:`TestDataProvider.gen_empty_result`
+                # See :py:meth:`TestDataProvider.gen_empty_result` above.
                 'firstName': '*unknown*',
 
-                'lastName':     'Ravenwood',
-                'profession':   'adventurer',
+                'lastName': 'Ravenwood',
+                'profession': 'adventurer',
             },
         )
 
@@ -122,6 +124,7 @@ class DataProviderTestCase(TestCase):
         """
         A value has a null load key.
         """
+
         class TestDataProvider(BaseDataProvider):
             def gen_load_key(self, value):
                 if value == 'bravo':
@@ -130,8 +133,8 @@ class DataProviderTestCase(TestCase):
 
             def fetch_from_backend(self, load_keys):
                 return {
-                    # Include data for ``bravo`` in the result, just to
-                    # make sure that we aren't cheating.
+                    # Include data for ``bravo`` in the result, just to make
+                    # sure that we aren't cheating.
                     'alpha': {'firstName': 'Henry'},
                     'bravo': {'firstName': 'Marcus'},
                 }
@@ -146,15 +149,16 @@ class DataProviderTestCase(TestCase):
 
         self.assertDictEqual(data_provider['alpha'], {'firstName': 'Henry'})
 
-        # The load key for ``bravo`` is null, so the data provider does
-        # not return any data for this key, even though technically the
-        # backend did.
+        # The load key for ``bravo`` is null, so the data provider does not
+        # return any data for this key, even though technically the backend
+        # did.
         self.assertDictEqual(data_provider['bravo'], {})
 
     def test_cache_key_null(self):
         """
         A value has a null cache key.
         """
+
         class TestDataProvider(BaseDataProvider):
             def gen_load_key(self, value):
                 return value['lastName']
@@ -170,10 +174,10 @@ class DataProviderTestCase(TestCase):
 
             def fetch_from_backend(self, load_keys):
                 return {
-                    # Include data for Nazi stooges in the result, just
-                    # to make sure that we aren't cheating.
-                    'Jones':    {'firstName': 'Henry'},
-                    'Belloq':   {'firstName': 'René'},
+                    # Include data for Nazi stooges in the result, just to make
+                    # sure that we aren't cheating.
+                    'Jones': {'firstName': 'Henry'},
+                    'Belloq': {'firstName': 'René'},
                 }
 
         users = [
@@ -188,27 +192,28 @@ class DataProviderTestCase(TestCase):
         data_provider = TestDataProvider()
         data_provider.register(users)
 
-        # The first two users generate a non-null cache key, so the
-        # data provider returns data for them.
+        # The first two users generate a non-null cache key, so the data
+        # provider returns data for them.
         self.assertDictEqual(data_provider[users[0]], {'firstName': 'Henry'})
         self.assertDictEqual(data_provider[users[1]], {'firstName': 'René'})
 
-        # The third user has a non-null load key, so the data provider
-        # was able to *load* data for it.  But, it has a null cache
-        # key, so the data provider can't *return* any data for it.
+        # The third user has a non-null load key, so the data provider was able
+        # to *load* data for it.  But, it has a null cache key, so the data
+        # provider can't *return* any data for it.
         self.assertDictEqual(data_provider[users[2]], {})
 
 
 class MutableDataProviderTestCase(TestCase):
     """
-    Tests various aspects of mutable data provider implementation
-    (effectively acts as a test case for
-    :py:class:`MutableDataProviderMixin`).
+    Tests various aspects of mutable data provider implementation (effectively
+    acts as a test case for :py:class:`MutableDataProviderMixin`).
     """
+
     def test_add_arbitrary_value(self):
         """
         Adding an arbitrary value to the data provider's cache.
         """
+
         class TestDataProvider(MutableDataProviderMixin, BaseDataProvider):
             def fetch_from_backend(self, load_keys):
                 return {
@@ -221,14 +226,14 @@ class MutableDataProviderTestCase(TestCase):
         data_provider = TestDataProvider()
         data_provider.register(users)
 
-        # If we try to get data for an unregistered value, we get an
-        # exception as normal.
+        # If we try to get data for an unregistered value, we get an exception
+        # as normal.
         with self.assertRaises(ValueError):
             # noinspection PyStatementEffect
             data_provider['charlie']
 
-        # However, if we specify a cache value explicitly, then we can
-        # retrieve it - even if we haven't loaded anything yet.
+        # However, if we specify a cache value explicitly, then we can retrieve
+        # it - even if we haven't loaded anything yet.
         data_provider['charlie'] = {'firstName': 'Sallah'}
 
         self.assertDictEqual(
@@ -258,6 +263,7 @@ class MutableDataProviderTestCase(TestCase):
         """
         Overriding data returned by the backend.
         """
+
         class TestDataProvider(MutableDataProviderMixin, BaseDataProvider):
             def fetch_from_backend(self, load_keys):
                 return {

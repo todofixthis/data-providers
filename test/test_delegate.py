@@ -10,6 +10,7 @@ class ProfessionalDataProvider(MockDataProvider):
     """
     Template for :py:class:`TestDelegate`.
     """
+
     def gen_load_key(self, value):
         return value['lastName']
 
@@ -19,9 +20,9 @@ class ProfessionalDataProvider(MockDataProvider):
 
 class TestDelegate(BaseDataProviderDelegate):
     """
-    Data provider delegate used by
-    :py:class:`DataProviderDelegateTestCase`.
+    Data provider delegate used by :py:class:`DataProviderDelegateTestCase`.
     """
+
     def gen_delegate_key(self, value):
         return value['profession']
 
@@ -34,20 +35,19 @@ class TestDelegate(BaseDataProviderDelegate):
 
         elif profession == 'nazi_stooge':
             return ProfessionalDataProvider({
-                'Belloq':   {'firstName': 'René'},
-                'Donovan':  {'firstName': 'Walter'},
+                'Belloq': {'firstName': 'René'},
+                'Donovan': {'firstName': 'Walter'},
             })
 
         raise ValueError(profession)
 
 
 class MutableProfessionalDataProvider(
-        # Mixin listed second so that it doesn't override MRO for
-        # subclass (it's closer to the base class
-        # py:class:`BaseDataProvider` than
-        # :py:class:`ProfessionalDataProvider` is).
-        ProfessionalDataProvider,
-        MutableDataProviderMixin,
+    # Mixin listed second so that it doesn't override MRO for subclass (it's
+    # closer to the base class py:class:`BaseDataProvider` than
+    # :py:class:`ProfessionalDataProvider` is).
+    ProfessionalDataProvider,
+    MutableDataProviderMixin,
 ):
     """
     Mutable version of :py:class:`ProfessionalDataProvider`.
@@ -56,16 +56,16 @@ class MutableProfessionalDataProvider(
 
 
 class TestMutableDelegate(
-        # Mixin listed second so that it doesn't override MRO for
-        # subclass (it's closer to the base class
-        # py:class:`BaseDataProvider` than :py:class:`TestDelegate`
-        # is).
-        TestDelegate,
-        MutableDataProviderDelegateMixin,
+    # Mixin listed second so that it doesn't override MRO for subclass (it's
+    # closer to the base class py:class:`BaseDataProvider` than
+    # :py:class:`TestDelegate` is).
+    TestDelegate,
+    MutableDataProviderDelegateMixin,
 ):
     """
     Mutable version of :py:class:`TestDelegate`.
     """
+
     def create_data_provider(self, profession):
         if profession == 'historian':
             return MutableProfessionalDataProvider({
@@ -76,8 +76,8 @@ class TestMutableDelegate(
         elif profession == 'nazi_stooge':
             # Note that this data provider is not mutable.
             return ProfessionalDataProvider({
-                'Belloq':   {'firstName': 'René'},
-                'Donovan':  {'firstName': 'Walter'},
+                'Belloq': {'firstName': 'René'},
+                'Donovan': {'firstName': 'Walter'},
             })
 
         raise ValueError(profession)
@@ -85,10 +85,10 @@ class TestMutableDelegate(
 
 class DataProviderDelegateTestCase(TestCase):
     """
-    Tests various aspects of data provider delegate implementation
-    (effectively acts as a test case for
-    :py:class:`BaseDataProviderDelegate`).
+    Tests various aspects of data provider delegate implementation (effectively
+    acts as a test case for :py:class:`BaseDataProviderDelegate`).
     """
+
     def test_happy_path(self):
         """
         Typical usage of data provider delegate.
@@ -111,9 +111,9 @@ class DataProviderDelegateTestCase(TestCase):
             users[0],
 
             {
-                'firstName':    'Henry',
-                'lastName':     'Jones',
-                'profession':   'historian',
+                'firstName': 'Henry',
+                'lastName': 'Jones',
+                'profession': 'historian',
             },
         )
 
@@ -121,9 +121,9 @@ class DataProviderDelegateTestCase(TestCase):
             users[1],
 
             {
-                'firstName':    'Marcus',
-                'lastName':     'Brody',
-                'profession':   'historian',
+                'firstName': 'Marcus',
+                'lastName': 'Brody',
+                'profession': 'historian',
             },
         )
 
@@ -131,9 +131,9 @@ class DataProviderDelegateTestCase(TestCase):
             users[2],
 
             {
-                'firstName':    'René',
-                'lastName':     'Belloq',
-                'profession':   'nazi_stooge',
+                'firstName': 'René',
+                'lastName': 'Belloq',
+                'profession': 'nazi_stooge',
             },
         )
 
@@ -141,9 +141,9 @@ class DataProviderDelegateTestCase(TestCase):
             users[3],
 
             {
-                'firstName':    'Walter',
-                'lastName':     'Donovan',
-                'profession':   'nazi_stooge',
+                'firstName': 'Walter',
+                'lastName': 'Donovan',
+                'profession': 'nazi_stooge',
             },
         )
 
@@ -156,18 +156,19 @@ class DataProviderDelegateTestCase(TestCase):
         with self.assertRaises(ValueError):
             data_provider.register([
                 # This value can't be registered because
-                # :py:class:`TestDelegate` doesn't know which data
-                # provider to use for the 'adventurer' profession.
+                # :py:class:`TestDelegate` doesn't know which data provider to
+                # use for the 'adventurer' profession.
                 {'lastName': 'Ravenwood', 'profession': 'adventurer'},
             ])
 
 
 class MutableDataProviderDelegateTestCase(TestCase):
     """
-    Tests various aspects of mutable data provider delegate
-    implementation (effectively acts as a test case for
+    Tests various aspects of mutable data provider delegate implementation
+    (effectively acts as a test case for
     :py:class:`MutableDataProviderDelegateMixin`).
     """
+
     def test_add_arbitrary_values(self):
         """
         Adding arbitrary values to data provider caches.
@@ -182,14 +183,14 @@ class MutableDataProviderDelegateTestCase(TestCase):
 
         wild_card = {'lastName': 'Jones', 'profession': 'historian'}
 
-        # If we try to get data for an unregistered value, we get an
-        # exception as normal.
+        # If we try to get data for an unregistered value, we get an exception
+        # as normal.
         with self.assertRaises(ValueError):
             # noinspection PyStatementEffect
             data_provider[wild_card]
 
-        # However, if we specify a cache value explicitly, then we can
-        # retrieve it - even if we haven't loaded anything yet.
+        # However, if we specify a cache value explicitly, then we can retrieve
+        # it - even if we haven't loaded anything yet.
         data_provider[wild_card] = {'firstName': 'Henry'}
 
         self.assertDictEqual(
@@ -253,8 +254,8 @@ class MutableDataProviderDelegateTestCase(TestCase):
 
         user = {'lastName': 'Belloq', 'profession': 'nazi_stooge'}
 
-        # Note that :py:class:`TestMutableDelegate` uses an
-        # immutable data provider for the "nazi_stooge" profession.
+        # Note that :py:class:`TestMutableDelegate` uses an immutable data
+        # provider for the "nazi_stooge" profession.
         with self.assertRaises(TypeError):
             data_provider[user] = {'firstName': 'René'}
 
@@ -265,9 +266,8 @@ class MutableDataProviderDelegateTestCase(TestCase):
         """
         data_provider = TestMutableDelegate()
 
-        # This value won't work because :py:class:`MutableTestDelegate`
-        # doesn't know which data provider to use for the 'adventurer'
-        # profession.
+        # This value won't work because :py:class:`MutableTestDelegate` doesn't
+        # know which data provider to use for the 'adventurer' profession.
         user = {'lastName': 'Ravenwood', 'profession': 'adventurer'}
 
         with self.assertRaises(ValueError):

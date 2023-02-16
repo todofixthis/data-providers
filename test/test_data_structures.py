@@ -1,4 +1,4 @@
-from typing import Dict, List, Text
+import typing
 from unittest import TestCase, mock
 
 from data_providers.data_structures import ParameterisedDefaultDict
@@ -12,7 +12,10 @@ class ParameterizedDefaultDictTestCase(TestCase):
         """
         factory = mock.Mock(return_value=[])
 
-        d = ParameterisedDefaultDict(factory)  # type: Dict[Text, List]
+        d: typing.Dict[
+            typing.Text,
+            typing.List[typing.Text],
+        ] = ParameterisedDefaultDict(factory)
 
         d['foo'].append('bar')
         d['foo'].append('baz')
@@ -30,7 +33,10 @@ class ParameterizedDefaultDictTestCase(TestCase):
         """
         factory = mock.Mock(return_value=[])
 
-        d = ParameterisedDefaultDict(
+        d: typing.Dict[
+            typing.Text,
+            typing.List[typing.Text],
+        ] = ParameterisedDefaultDict(
             factory,
 
             # Additional positional arguments.
@@ -40,7 +46,7 @@ class ParameterizedDefaultDictTestCase(TestCase):
             # Additional keyword arguments.
             charlie='delta',
             echo='foxtrot',
-        )  # type: Dict[Text, List]
+        )
 
         d['foo'].append('bar')
         d['foo'].append('baz')
