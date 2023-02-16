@@ -1,18 +1,9 @@
-# coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from unittest import TestCase
 
 from itertools import chain
-from six import itervalues
 
 from data_providers.aggregator import BaseDataProviderAggregator
 from data_providers.testing import MockDataProvider
-
-__all__ = [
-    'DataProviderAggregatorTestCase',
-]
 
 
 class MovieLineDataProvider(MockDataProvider):
@@ -30,19 +21,19 @@ class MovieLineDataProvider(MockDataProvider):
 class MovieLineAggregator(BaseDataProviderAggregator):
     """
     Trivial data provider aggregator implementation that assembles
-    movie lines spoken by famous celebrities from a variety of sources.
+    movie lines spoken by celebrities from a variety of sources.
 
     Used to test :py:class:`BaseDataProviderAggregator`.
     """
     def aggregate_data(self, value, data):
-        return list(chain(*itervalues(data)))
+        return list(chain(*data.values()))
 
     def create_data_providers(self):
         # Simulate a scenario where we are loading movie lines from
         # different sources depending on which movie they come from.
         # noinspection SpellCheckingInspection
         return {
-            # Maybe we have all of the lines from Brazil stored in a
+            # Maybe we have all the lines from Brazil stored in a
             # local database.
             'brazil':
                 MovieLineDataProvider({

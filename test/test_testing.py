@@ -1,16 +1,6 @@
-# coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from unittest import TestCase
 
-from six import iteritems, iterkeys
-
 from data_providers.testing import MockDataProvider
-
-__all__ = [
-    'MockDataProviderTestCase',
-]
 
 
 class MockDataProviderTestCase(TestCase):
@@ -40,9 +30,9 @@ class MockDataProviderTestCase(TestCase):
             # noinspection PyStatementEffect
             data_provider['alpha']
 
-        data_provider.register(iterkeys(users))
+        data_provider.register(users.keys())
 
-        for username, user_data in iteritems(users):
+        for username, user_data in users.items():
             user_data.update(data_provider[username])
 
         self.assertDictEqual(users['alpha'], {'firstName': 'Henry'})

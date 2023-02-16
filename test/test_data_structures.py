@@ -1,12 +1,7 @@
-# coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
-from typing import Dict, Text, List
-from unittest import TestCase
+from typing import Dict, List, Text
+from unittest import TestCase, mock
 
 from data_providers.data_structures import ParameterizedDefaultDict
-from data_providers.testing import mock
 
 
 class ParameterizedDefaultDictTestCase(TestCase):
@@ -17,7 +12,7 @@ class ParameterizedDefaultDictTestCase(TestCase):
         """
         factory = mock.Mock(return_value=[])
 
-        d = ParameterizedDefaultDict(factory) # type: Dict[Text, List]
+        d = ParameterizedDefaultDict(factory)  # type: Dict[Text, List]
 
         d['foo'].append('bar')
         d['foo'].append('baz')
@@ -43,15 +38,17 @@ class ParameterizedDefaultDictTestCase(TestCase):
             'bravo',
 
             # Additional keyword arguments.
-            charlie = 'delta',
-            echo    = 'foxtrot',
-        ) # type: Dict[Text, List]
+            charlie='delta',
+            echo='foxtrot',
+        )  # type: Dict[Text, List]
 
         d['foo'].append('bar')
         d['foo'].append('baz')
         d['foobie'].append('bletch')
 
         factory.assert_has_calls([
-            mock.call('foo', 'alpha', 'bravo', charlie='delta', echo='foxtrot'),
-            mock.call('foobie', 'alpha', 'bravo', charlie='delta', echo='foxtrot'),
+            mock.call('foo', 'alpha', 'bravo', charlie='delta',
+                echo='foxtrot'),
+            mock.call('foobie', 'alpha', 'bravo', charlie='delta',
+                echo='foxtrot'),
         ])

@@ -1,17 +1,6 @@
-# coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from unittest import TestCase
 
-from six import iteritems
-
 from data_providers import BaseDataProvider, MutableDataProviderMixin
-
-__all__ = [
-    'DataProviderTestCase',
-    'MutableDataProviderTestCase',
-]
 
 
 class DataProviderTestCase(TestCase):
@@ -41,7 +30,7 @@ class DataProviderTestCase(TestCase):
                 for lk in load_keys:
                     method = getattr(self, 'get_{job}s'.format(job=lk), None)
                     if method:
-                        for key, data in iteritems(method()):
+                        for key, data in method().items():
                             yield key, data
 
             def gen_empty_result(self):

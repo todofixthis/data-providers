@@ -1,18 +1,9 @@
-# coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from unittest import TestCase
 
 from data_providers import MutableDataProviderMixin
 from data_providers.delegate import BaseDataProviderDelegate, \
     MutableDataProviderDelegateMixin
 from data_providers.testing import MockDataProvider
-
-__all__ = [
-    'DataProviderDelegateTestCase',
-    'MutableDataProviderDelegateTestCase',
-]
 
 
 class ProfessionalDataProvider(MockDataProvider):

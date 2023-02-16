@@ -1,12 +1,6 @@
-# coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
+import typing
 from abc import ABCMeta, abstractmethod as abstract_method
-from collections import defaultdict, OrderedDict
-from typing import Any, Hashable, Iterable, Mapping
-
-from six import iteritems, iterkeys, with_metaclass
+from collections import OrderedDict
 
 from data_providers import BaseDataProvider
 
@@ -15,11 +9,12 @@ __all__ = [
 ]
 
 
-class BaseDataProviderAggregator(with_metaclass(ABCMeta)):
+class BaseDataProviderAggregator(metaclass=ABCMeta):
     """
-    A data-provider-like object that aggregates values from
-    several data providers.
+    A data-provider-like object that aggregates values from several data
+    providers.
     """
+
     def __init__(self):
         super(BaseDataProviderAggregator, self).__init__()
 
@@ -33,22 +28,22 @@ class BaseDataProviderAggregator(with_metaclass(ABCMeta)):
             The lookup key.
 
         :raise:
-            - :py:class:`ValueError` if the value wasn't registered
-              first.
+            - :py:class:`ValueError` if the value wasn't registered first.
         """
         return self.aggregate_data(
-            value = value,
+            value=value,
 
-            # Using an OrderedDict, just in case order is significant.
-            data = OrderedDict(
-                (key, self.data_providers[key][value])
-                    for key in self.gen_routing_keys(value)
-            ),
+            data={
+                key: self.data_providers[key][value]
+                for key in self.gen_routing_keys(value)
+            },
         )
 
     @property
-    def data_providers(self):
-        # type: () -> Mapping[Hashable, BaseDataProvider]
+    def data_providers(self) -> typing.Mapping[
+        typing.Hashable,
+        BaseDataProvider,
+    ]:
         """
         Lazy-loads the data providers for this aggregator.
         """
@@ -57,56 +52,61 @@ class BaseDataProviderAggregator(with_metaclass(ABCMeta)):
         return self._data_providers
 
     @abstract_method
-    def aggregate_data(self, value, data):
-        # type: (Any, Mapping) -> Any
+    def aggregate_data(self,
+            value: typing.Any,
+            data: typing.Mapping[typing.Hashable, typing.Iterable[typing.Any]],
+    ) -> typing.Any:
         """
-        Aggregates the data returned by each of the data providers for
-        the specified value.
+        Aggregates the data returned by each of the data providers for the
+        specified value.
 
         :param value:
             The value provided to :py:meth:`__getitem__`.
 
         :param data:
-            A mapping containing the data returned by each data
-            provider (corresponding to
-            :py:meth:`create_data_providers`).
+            A mapping containing the data returned by each data provider
+            (corresponding to :py:meth:`create_data_providers`).
 
-            Note that this value might only contain a subset of the
-            data providers, depending on :py:meth:`gen_routing_keys`.
+            Note that this value might only contain a subset of the data
+            providers, depending on :py:meth:`gen_routing_keys`.
         """
         raise NotImplementedError(
             'Not implemented in {cls}.'.format(cls=type(self).__name__),
         )
 
     @abstract_method
-    def create_data_providers(self):
-        # type: () -> Mapping[Hashable, BaseDataProvider]
+    def create_data_providers(self) -> typing.Mapping[
+        typing.Hashable,
+        BaseDataProvider,
+    ]:
         """
         Creates the mapping of data providers used by this aggregator.
 
         :return:
-            Must return a mapping, so that each data provider is mapped
-            to a unique key.
+            Must return a mapping, so that each data provider is mapped to a
+            unique key.
         """
         raise NotImplementedError(
             'Not implemented in {cls}.'.format(cls=type(self).__name__),
         )
 
     # noinspection PyUnusedLocal
-    def gen_routing_keys(self, value):
-        # type: (Any) -> Iterable[Hashable]
+    def gen_routing_keys(self,
+            value: typing.Any,
+    ) -> typing.Iterable[typing.Hashable]:
         """
-        Returns the keys of the data providers that should handle the
-        specified value.
+        Returns the keys of the data providers that should handle the specified
+        value.
 
         :return:
             Values correspond to keys in the mapping returned by
             :py:meth:`create_data_providers`.
         """
-        return iterkeys(self.data_providers)
+        return self.data_providers.keys()
 
-    def group_by_routing_keys(self, values):
-        # type: (Iterable) -> Mapping[Hashable, Iterable]
+    def group_by_routing_keys(self,
+            values: typing.Iterable[typing.Any],
+    ) -> typing.Mapping[typing.Hashable, typing.Iterable[typing.Any]]:
         """
         Groups a set of values by their routing keys.
         """
@@ -119,11 +119,10 @@ class BaseDataProviderAggregator(with_metaclass(ABCMeta)):
 
         return groups
 
-    def register(self, values):
-        # type: (Iterable) -> None
+    def register(self, values: typing.Iterable[typing.Any]) -> None:
         """
-        Registers a set of values so that the data providers can plan
-        out the bulk queries they need to execute against the backend.
+        Registers a set of values so that the data providers can plan out the
+        bulk queries they need to execute against the backend.
         """
-        for key, group in iteritems(self.group_by_routing_keys(values)):
+        for key, group in self.group_by_routing_keys(values).items():
             self.data_providers[key].register(group)
