@@ -1,20 +1,38 @@
-.. Data Providers documentation master file, created by
-   sphinx-quickstart on Wed Oct 25 16:26:46 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Data Providers's documentation!
-==========================================
-
+Contents
+========
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
 
+Data Providers
+==============
+Generic implementation of the flywheel pattern.
 
+Data Providers is a great fit for situations where you need to bulk-fetch a lot
+of data (e.g., from a database, API query, output from a computationally-
+expensive operation, etc.) and then iterate over the results later on.
 
-Indices and tables
-==================
+Requirements
+------------
+Data Providers is known to be compatible with the following Python versions:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+- 3.11
+- 3.10
+- 3.9
+
+.. note::
+   I'm only one person, so to keep from getting overwhelmed, I'm only committing
+   to supporting the 3 most recent versions of Python.  Data Providers may work
+   in versions not listed here — there just won't be any test coverage to prove
+   it 😇
+
+Installation
+------------
+Install the latest stable version via pip::
+
+    pip install phx-data-providers
+
+.. important::
+   Make sure to install `phx-data-providers`, **not** `data-providers`.  I
+   created the latter at a previous job years ago, and after I left they never
+   touched that project again and stopped responding to my emails — so in the
+   end I had to fork it 🤷
