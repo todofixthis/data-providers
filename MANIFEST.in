@@ -1,0 +1,3 @@
+include LICENCE.txt
+graft test
+prune **/__pycache__

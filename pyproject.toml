@@ -1,0 +1,42 @@
+# :see: https://peps.python.org/pep-0621/
+
+[project]
+name = "phx-data-providers"
+version = "3.0.0"
+description = "Generic implementation of the flywheel design pattern."
+readme = "README.rst"
+requires-python = ">= 3.9"
+license = { file = "LICENCE.txt" }
+authors = [
+    { email = "Phoenix Zerin <phx@phx.nz>" }
+]
+
+keywords = [
+    "aggregator",
+    "design patterns",
+    "flywheel pattern",
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    'Topic :: Text Processing :: Filters',
+]
+
+[project.optional-dependencies]
+# Utilities for Project Maintainers
+"build-system" = ["build", "twine"]
+"docs-builder" = ["sphinx", "sphinx_rtd_theme"]
+"test-runner" = ["tox"]
+
+[project.urls]
+Documentation = "https://data-providers.readthedocs.io/en/latest/extension_filters.html#django-filters"
+Changelog = "https://github.com/todofixthis/data-providers/releases"
+Issues = "https://github.com/todofixthis/data-providers/issues"
+Repository = "https://github.com/todofixthis/data-providers"
