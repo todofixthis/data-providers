@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod as abstract_method
 from collections import defaultdict as default_dict
 
 from data_providers import BaseDataProvider, MutableDataProviderMixin
-from data_providers.data_structures import ParameterizedDefaultDict
+from data_providers.data_structures import ParameterisedDefaultDict
 from data_providers.exceptions import with_context
 
 __all__ = [
@@ -27,7 +27,7 @@ class BaseDataProviderDelegate(metaclass=ABCMeta):
         self._delegates: typing.Dict[
             typing.Hashable,
             BaseDataProvider,
-        ] = ParameterizedDefaultDict(self.create_data_provider)
+        ] = ParameterisedDefaultDict(self.create_data_provider)
 
     def __getitem__(self, value: typing.Any) -> typing.Any:
         """

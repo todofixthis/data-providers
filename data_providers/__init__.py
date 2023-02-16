@@ -114,8 +114,9 @@ class BaseDataProvider(metaclass=ABCMeta):
             'Not implemented in {cls}.'.format(cls=type(self).__name__),
         )
 
-    def gen_load_key(self, value: typing.Any) -> typing.Optional[
-        typing.Hashable]:
+    def gen_load_key(self,
+            value: typing.Any,
+    ) -> typing.Optional[typing.Hashable]:
         """
         Extracts the value that will be used by the backend to load
         data for the specified value.
@@ -130,8 +131,9 @@ class BaseDataProvider(metaclass=ABCMeta):
         """
         return value
 
-    def gen_cache_key(self, value: typing.Any) -> typing.Optional[
-        typing.Hashable]:
+    def gen_cache_key(self,
+            value: typing.Any,
+    ) -> typing.Optional[typing.Hashable]:
         """
         Generates a lookup key for the data provider's cached data.
 
@@ -145,7 +147,7 @@ class BaseDataProvider(metaclass=ABCMeta):
         """
         return self.gen_load_key(value)
 
-    def gen_empty_result(self) -> typing.Any:
+    def gen_empty_result(self) -> typing.Optional[typing.Any]:
         """
         Generates an empty result that is returned if the backend cannot (or
         will not) return data for a particular key.
@@ -176,7 +178,11 @@ class BaseDataProvider(metaclass=ABCMeta):
         if self._pending_load_keys:
             self._load_batch(self._pending_load_keys)
 
-    def _create_cache(self) -> typing.MutableMapping:
+    # noinspection PyMethodMayBeStatic
+    def _create_cache(self) -> typing.MutableMapping[
+        typing.Hashable,
+        typing.Any,
+    ]:
         """
         Initializes the cache that the data provider will use.
 

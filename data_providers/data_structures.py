@@ -4,7 +4,7 @@ from collections import defaultdict as default_dict
 T = typing.TypeVar('T')
 
 
-class ParameterizedDefaultDict(default_dict):
+class ParameterisedDefaultDict(default_dict):
     """
     A :py:class:`default_dict` that passes parameters to its
     :py:meth:`__missing__` method.
@@ -23,24 +23,25 @@ class ParameterizedDefaultDict(default_dict):
             Must accept at least one argument (the key of the new value).
 
         :param args:
-            Additional positional arguments that will be passed to the factory.
+            Additional positional arguments that will be passed to the factory
+            after the key value.
 
         :param kwargs:
             Additional keyword arguments that will be passed to the factory.
         """
-        super(ParameterizedDefaultDict, self).__init__(default_factory)
+        super(ParameterisedDefaultDict, self).__init__(default_factory)
 
         self._factory_args = args
         self._factory_kwargs = kwargs
 
-    def __missing__(self, key):
-        # type: (Hashable) -> T
+    def __missing__(self, key: typing.Hashable) -> T:
         """
         Invoked when accessing a key that does not yet exist in the dict.
         """
         if not self.default_factory:
             raise KeyError(key)
 
+        # noinspection PyArgumentList
         self[key] = value = \
             self.default_factory(
                 key,
