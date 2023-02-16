@@ -1,4 +1,4 @@
-.. image:: https://github.com/todofixthis/data-providers/actions/workflows/build/badge.svg
+.. image:: https://github.com/todofixthis/data-providers/actions/workflows/build.yml/badge.svg
    :target: https://github.com/todofixthis/data-providers/actions/workflows/build.yml
 .. image:: https://readthedocs.org/projects/data-providers/badge/?version=latest
    :target: http://data-providers.readthedocs.io/
