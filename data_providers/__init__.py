@@ -6,11 +6,15 @@ from data_providers.exceptions import with_context
 
 __all__ = [
     'BaseDataProvider',
+    'DataProvider',
     'MutableDataProviderMixin',
 ]
 
+TKey = typing.TypeVar('TKey', bound=typing.Hashable)
+TVal = typing.TypeVar('TVal')
 
-class BaseDataProvider(metaclass=ABCMeta):
+
+class BaseDataProvider(typing.Generic[TKey, TVal], metaclass=ABCMeta):
     """
     Implementation of the flywheel pattern.  Bulk-loads data from a backend
     and parcels them out on an as-needed basis.
@@ -44,7 +48,7 @@ class BaseDataProvider(metaclass=ABCMeta):
         return data for one or more load keys.
         """
 
-    def __getitem__(self, value: typing.Any) -> typing.Any:
+    def __getitem__(self, value: TKey) -> TVal:
         """
         Returns data for the specified value.
 
@@ -97,9 +101,8 @@ class BaseDataProvider(metaclass=ABCMeta):
     @abstract_method
     def fetch_from_backend(self, load_keys: typing.Set[typing.Hashable]) -> \
             typing.Union[
-                typing.Mapping[typing.Hashable, typing.Any],
-                typing.Generator[
-                    typing.Tuple[typing.Hashable, typing.Any], None, None],
+                typing.Mapping[typing.Hashable, TVal],
+                typing.Iterable[typing.Tuple[typing.Hashable, TVal]],
             ]:
         """
         Fetches data from the backend for the specified load keys.
@@ -114,9 +117,7 @@ class BaseDataProvider(metaclass=ABCMeta):
             'Not implemented in {cls}.'.format(cls=type(self).__name__),
         )
 
-    def gen_load_key(self,
-            value: typing.Any,
-    ) -> typing.Optional[typing.Hashable]:
+    def gen_load_key(self, key: TKey) -> typing.Optional[typing.Hashable]:
         """
         Extracts the value that will be used by the backend to load
         data for the specified value.
@@ -126,14 +127,12 @@ class BaseDataProvider(metaclass=ABCMeta):
         passed to :py:meth:`__getitem__`, the data provider will return
         an empty result instead (see :py:meth:`gen_empty_result`).
 
-        :param value:
-            The value passed to :py:meth:`__getitem__`.
+        :param key:
+            The key passed to :py:meth:`__getitem__`.
         """
-        return value
+        return key
 
-    def gen_cache_key(self,
-            value: typing.Any,
-    ) -> typing.Optional[typing.Hashable]:
+    def gen_cache_key(self, key: TKey) -> typing.Optional[typing.Hashable]:
         """
         Generates a lookup key for the data provider's cached data.
 
@@ -142,12 +141,12 @@ class BaseDataProvider(metaclass=ABCMeta):
         :py:meth:`__getitem__`, the data provider will return an empty result
         instead (see :py:meth:`gen_empty_result`).
 
-        :param value:
-            The key value passed to `__getitem__`.
+        :param key:
+            The key value passed to ``__getitem__``.
         """
-        return self.gen_load_key(value)
+        return self.gen_load_key(key)
 
-    def gen_empty_result(self) -> typing.Optional[typing.Any]:
+    def gen_empty_result(self) -> typing.Optional[TVal]:
         """
         Generates an empty result that is returned if the backend cannot (or
         will not) return data for a particular key.
@@ -158,7 +157,7 @@ class BaseDataProvider(metaclass=ABCMeta):
         """
         return None
 
-    def register(self, values: typing.Iterable[typing.Any]) -> None:
+    def register(self, values: typing.Iterable[TKey]) -> None:
         """
         Registers a set of values so that the data provider can plan out the
         bulk queries it needs to execute against the backend.
@@ -179,10 +178,7 @@ class BaseDataProvider(metaclass=ABCMeta):
             self._load_batch(self._pending_load_keys)
 
     # noinspection PyMethodMayBeStatic
-    def _create_cache(self) -> typing.MutableMapping[
-        typing.Hashable,
-        typing.Any,
-    ]:
+    def _create_cache(self) -> typing.MutableMapping[typing.Hashable, TVal]:
         """
         Initializes the cache that the data provider will use.
 
@@ -193,7 +189,7 @@ class BaseDataProvider(metaclass=ABCMeta):
 
     def _add_to_cache(self,
             cache_key: typing.Hashable,
-            cache_value: typing.Any,
+            cache_value: TVal,
     ) -> None:
         """
         Adds a value to the cache.
@@ -204,7 +200,7 @@ class BaseDataProvider(metaclass=ABCMeta):
         """
         self._cache[cache_key] = cache_value
 
-    def _get_from_cache(self, cache_key: typing.Hashable) -> typing.Any:
+    def _get_from_cache(self, cache_key: typing.Hashable) -> TVal:
         """
         Attempts to retrieve the data from the cache for the specified key.
 
@@ -215,22 +211,22 @@ class BaseDataProvider(metaclass=ABCMeta):
         """
         return self._cache[cache_key]
 
-    def _add_to_key_registry(self, value: typing.Any) -> None:
+    def _add_to_key_registry(self, key: TKey) -> None:
         """
         Adds the specified value to the registry of unloaded keys.
 
-        :param value:
-            The value that was passed to :py:meth:`register`.
+        :param key:
+            The key that was passed to :py:meth:`register`.
         """
         # If we can't load data for a value, then there's no point in
         # registering it.
-        load_key = self.gen_load_key(value)
+        load_key = self.gen_load_key(key)
         if load_key is not None:
             # If we can't cache data for a value, then there would be no point
             # in loading data for it.
             # Also, we don't need to register a value if we already have cached
             # data for it.
-            cache_key = self.gen_cache_key(value)
+            cache_key = self.gen_cache_key(key)
             if (cache_key is not None) and (cache_key not in self._cache):
                 # Queue the load key for the next time we call
                 # :py:meth:`_load_data`.
@@ -242,8 +238,9 @@ class BaseDataProvider(metaclass=ABCMeta):
                 self._pending_cache_keys[load_key].add(cache_key)
 
     # noinspection PyUnusedLocal
-    def _get_keys_to_load(self, hint: typing.Hashable) -> typing.Set[
-        typing.Hashable]:
+    def _get_keys_to_load(self,
+            hint: typing.Hashable,
+    ) -> typing.Set[typing.Hashable]:
         """
         Used by :py:meth:`_load_data` to decide which values to send to the
         backend.
@@ -253,8 +250,10 @@ class BaseDataProvider(metaclass=ABCMeta):
         strategy.
 
         :param hint:
-            The requested load key (based on the value passed to
-            :py:meth:`__getitem__`).
+            The requested load key (based on the key passed to
+            :py:meth:`__getitem__`).  This can be useful if the data provider
+            only needs to load a subset of the data depending on which key the
+            caller requested data for.
         """
         return self._pending_load_keys
 
@@ -263,8 +262,10 @@ class BaseDataProvider(metaclass=ABCMeta):
         Bulk-loads data from the backend in the event of a cache miss.
 
         :param hint:
-            The requested load key (based on the value passed to
-            :py:meth:`__getitem__`).
+            The requested load key (based on the key passed to
+            :py:meth:`__getitem__`).  Passed to :py:meth:`_get_keys_to_load`,
+            in case only a subset of the data should be loaded depending on
+            which key the caller requested data for.
         """
         batched_load_keys = self._get_keys_to_load(hint)
         if batched_load_keys:
@@ -303,7 +304,10 @@ class BaseDataProvider(metaclass=ABCMeta):
         self._pending_load_keys -= load_keys
 
 
-class MutableDataProviderMixin(BaseDataProvider, metaclass=ABCMeta):
+class MutableDataProviderMixin(
+    BaseDataProvider[TKey, TVal],
+    metaclass=ABCMeta,
+):
     """
     A mixin for data provider classes that allow external code to modify the
     contents of the cache.
@@ -316,20 +320,20 @@ class MutableDataProviderMixin(BaseDataProvider, metaclass=ABCMeta):
 
         self._override_cache_keys: typing.Set[typing.Hashable] = set()
 
-    def __setitem__(self, value: typing.Any, cache_value: typing.Any) -> None:
+    def __setitem__(self, key: TKey, cache_value: TVal) -> None:
         """
         Sets the cached value for the specified object.
 
-        :param value:
+        :param key:
             Same as :py:meth:`__getitem__`.
 
         :param cache_value:
             The value that should be put in the cache.
         """
-        load_key = self.gen_load_key(value)
+        load_key = self.gen_load_key(key)
         if load_key is not None:
 
-            cache_key = self.gen_cache_key(value)
+            cache_key = self.gen_cache_key(key)
             if cache_key is not None:
 
                 # Since we are setting the cached value explicitly, we do not
@@ -352,7 +356,7 @@ class MutableDataProviderMixin(BaseDataProvider, metaclass=ABCMeta):
 
     def _replace_cached_value(self,
             cache_key: typing.Hashable,
-            cache_value: typing.Any,
+            cache_value: TVal,
     ) -> None:
         """
         Replaces a value in the cache.
@@ -365,7 +369,7 @@ class MutableDataProviderMixin(BaseDataProvider, metaclass=ABCMeta):
 
     def _add_to_cache(self,
             cache_key: typing.Hashable,
-            cache_value: typing.Any,
+            cache_value: TVal,
     ) -> None:
         """
         Adds a value to the cache, if it has not been overridden by
@@ -374,3 +378,62 @@ class MutableDataProviderMixin(BaseDataProvider, metaclass=ABCMeta):
         if cache_key not in self._override_cache_keys:
             super(MutableDataProviderMixin, self) \
                 ._add_to_cache(cache_key, cache_value)
+
+
+class DataProvider(MutableDataProviderMixin[TKey, TVal]):
+    """
+    Basic data provider implementation.
+    """
+
+    def __init__(self,
+            loader: typing.Callable[
+                [typing.Set[TKey]],
+                typing.Union[
+                    typing.Mapping[TKey, TVal],
+                    typing.Iterable[typing.Tuple[TKey, TVal]],
+                ],
+            ],
+    ) -> None:
+        """
+        :param loader:
+            The function that will be used to load the values from the backend.
+
+            The function must accept a set of load keys and return a dict or
+            tuple of key/value pairs, so that it can associate each load key
+            with the corresponding data from the backend.
+
+        Example:
+
+        .. code-block:: python
+
+           def get_users_by_id(user_ids: Set[int]) -> Dict[int, dict]:
+               '''
+               Load user records for the specified IDs and return the
+               corresponding rows.
+               '''
+               # ...
+
+           dp = DataProvider(get_users_by_id)
+           dp.register(user_ids)
+
+           for user_id in user_ids:
+               # ``dp[user_id]`` will be the row the bulk-query returned
+               # for the that user ID.
+               do_something_with(dp[user_id])
+
+        Refer to the unit test for more examples.
+        """
+        super().__init__()
+
+        self.loader = loader
+
+    def fetch_from_backend(self,
+            load_keys: typing.Set[TKey]
+    ) -> typing.Union[
+        typing.Mapping[TKey, TVal],
+        typing.Iterable[typing.Tuple[TKey, TVal]],
+    ]:
+        """
+        Execute the loader function to bulk-load data from the backend.
+        """
+        return self.loader(load_keys)

@@ -11,8 +11,8 @@ class ProfessionalDataProvider(MockDataProvider):
     Template for :py:class:`TestDelegate`.
     """
 
-    def gen_load_key(self, value):
-        return value['lastName']
+    def gen_load_key(self, key):
+        return key['lastName']
 
     def gen_empty_result(self):
         return {}

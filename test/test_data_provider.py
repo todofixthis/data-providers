@@ -1,9 +1,62 @@
+import typing
 from unittest import TestCase
 
-from data_providers import BaseDataProvider, MutableDataProviderMixin
+from data_providers import BaseDataProvider, DataProvider, \
+    MutableDataProviderMixin
 
 
 class DataProviderTestCase(TestCase):
+    """
+    Shows how to use :py:class:`DataProvider`.
+    """
+
+    def test_example_usage(self):
+        """
+        Using `DataProvider` to bulk-load data from a backend such as a
+        database.
+        """
+
+        # Example of a loader function that we'll wrap with a DataProvider.
+        def get_users_by_id(
+                user_ids: typing.Set[int]
+        ) -> typing.Dict[int, dict]:
+            # In order to keep the unit test self-contained, this function just
+            # returns some hard-coded data, but in a real-world use case, it
+            # would connect to a database and execute a complicated query (or
+            # run a data model, make some API calls, etc.).
+            return {
+                1: {'id': 1, 'username': 'alice', 'role': 'admin'},
+                2: {'id': 2, 'username': 'bob', 'role': 'boss'},
+                3: {'id': 3, 'username': 'charlie', 'role': 'c-suite'},
+            }
+
+        # Wrap the function in a data provider.
+        # Note that DataProvider is a generic, so we can also specify the type
+        # for keys (``int``) and their corresponding values (``dict``).
+        dp: DataProvider[int, dict] = DataProvider(get_users_by_id)
+
+        # Before we can execute the query, we have to tell the data provider
+        # which keys we'll be using to load the data.
+        dp.register([1, 2, 3])
+
+        # Now we can pull out individual rows from the bulk query.
+        self.assertDictEqual(
+            dp[1],
+            {'id': 1, 'username': 'alice', 'role': 'admin'},
+        )
+
+        self.assertDictEqual(
+            dp[2],
+            {'id': 2, 'username': 'bob', 'role': 'boss'},
+        )
+
+        self.assertDictEqual(
+            dp[3],
+            {'id': 3, 'username': 'charlie', 'role': 'c-suite'},
+        )
+
+
+class CustomisedDataProviderTestCase(TestCase):
     """
     Tests various aspects of data provider implementations (effectively acts as
     a test case for :py:class:`BaseDataProvider`).
@@ -15,13 +68,13 @@ class DataProviderTestCase(TestCase):
         """
 
         class TestDataProvider(BaseDataProvider):
-            def gen_load_key(self, value):
+            def gen_load_key(self, key):
                 # Use profession to load data from the backend.
-                return value['profession']
+                return key['profession']
 
-            def gen_cache_key(self, value):
+            def gen_cache_key(self, key):
                 # Cache results by last name.
-                return value['lastName']
+                return key['lastName']
 
             def fetch_from_backend(self, load_keys):
                 # This roughly simulates a scenario where we have to hit a
@@ -126,10 +179,10 @@ class DataProviderTestCase(TestCase):
         """
 
         class TestDataProvider(BaseDataProvider):
-            def gen_load_key(self, value):
-                if value == 'bravo':
+            def gen_load_key(self, key):
+                if key == 'bravo':
                     return None
-                return value
+                return key
 
             def fetch_from_backend(self, load_keys):
                 return {
@@ -160,14 +213,14 @@ class DataProviderTestCase(TestCase):
         """
 
         class TestDataProvider(BaseDataProvider):
-            def gen_load_key(self, value):
-                return value['lastName']
+            def gen_load_key(self, key):
+                return key['lastName']
 
-            def gen_cache_key(self, value):
-                if value['profession'] == 'nazi_stooge':
+            def gen_cache_key(self, key):
+                if key['profession'] == 'nazi_stooge':
                     return None
 
-                return value['lastName']
+                return key['lastName']
 
             def gen_empty_result(self):
                 return {}
